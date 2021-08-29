@@ -1,0 +1,35 @@
+
+service: serverless-email-inbox
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: prod
+  region: eu-west-1
+  stackName: serverless-email-inbox-stack
+  apiName: serverless-email-inbox-api
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ses:SendRawEmail"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource: "*"
+
+package:
+  exclude:
+    - config/**
+    - .eslintrc.js
+    - package-lock.json
+    - package.json
+    - yarn.lock
+  include:
+    - config.js
+
+functions:
+  inbox:
+    handler: handler.inbox
+    description: Parse email from SES
+    timeout: 15
