@@ -36,8 +36,6 @@ module.exports.inbox = async (event) => {
       for (let key of verdicts) {
         const verdict = receipt[key];
 
-        console.info(verdict);
-
         if (verdict && verdict.status === 'FAIL') {
           throw new Error(
             `rejected by spam filter; ${key} = ${verdict.status}`
@@ -86,8 +84,6 @@ module.exports.inbox = async (event) => {
         processed.attachments = attachments;
         processed.html = html;
         processed.subject = subject;
-
-        console.log(`html to parse for links:`, html);
 
         const categoryFound = config.emailToCategories.find(
           (category) => category.email === to.value[0].address
