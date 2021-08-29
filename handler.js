@@ -14,39 +14,43 @@ module.exports.inbox = async (event) => {
     event.Records[0].ses &&
     event.Records[0].ses
   ) {
-    const mail = event.Records[0].ses.mail;
-    const receipt = event.Records[0].ses.receipt;
-
-    if (!mail) {
-      throw new Error('No mail object was provided.');
-    }
-    if (!receipt) {
-      throw new Error('No receipt object was provided.');
-    }
-
-    const verdicts = [
-      'spamVerdict',
-      'virusVerdict',
-      'spfVerdict',
-      'dkimVerdict',
-      'dmarcVerdict',
-    ];
-    for (let key of verdicts) {
-      const verdict = receipt[key];
-      if (verdict && verdict.status === 'FAIL') {
-        throw new Error(`rejected by spam filter; ${key} = ${verdict.status}`);
-      }
-    }
-
-    console.log('Parsing incoming email...');
-
-    const { messageId } = mail;
-
-    console.log(
-      `Fetching email at s3://${config.bucket}/${config.keyPrefix}${messageId}`
-    );
-
     try {
+      const mail = event.Records[0].ses.mail;
+      const receipt = event.Records[0].ses.receipt;
+
+      if (!mail) {
+        throw new Error('No mail object was provided.');
+      }
+      if (!receipt) {
+        throw new Error('No receipt object was provided.');
+      }
+
+      console.log('Checking spam verdict...');
+
+      const verdicts = [
+        'spamVerdict',
+        'virusVerdict',
+        'spfVerdict',
+        'dkimVerdict',
+        'dmarcVerdict',
+      ];
+      for (let key of verdicts) {
+        const verdict = receipt[key];
+        if (verdict && verdict.status === 'FAIL') {
+          throw new Error(
+            `rejected by spam filter; ${key} = ${verdict.status}`
+          );
+        }
+      }
+
+      console.log('Parsing incoming email...');
+
+      const { messageId } = mail;
+
+      console.log(
+        `Fetching email at s3://${config.bucket}/${config.keyPrefix}${messageId}`
+      );
+
       const data = await s3
         .getObject({
           Bucket: config.bucket,
@@ -60,16 +64,8 @@ module.exports.inbox = async (event) => {
 
       console.log(parsed);
 
-      const {
-        from,
-        to,
-        headerLines,
-        attachments,
-        html,
-        subject,
-        date,
-        messageId,
-      } = parsed;
+      const { from, to, headerLines, attachments, html, subject, date } =
+        parsed;
 
       const { address, name } = from.value[0];
 
@@ -79,12 +75,12 @@ module.exports.inbox = async (event) => {
       ) {
         console.log('Processing message...');
 
-        // TODO: categorise and process email here.
+        // TODO: add in some better validation that it came from me :).
 
         const processed = {};
 
         processed.id = messageId;
-        processed.date = date;
+        processed.recieved = date;
         processed.to = to;
         processed.from = from;
         processed.subject = subject;
@@ -101,17 +97,21 @@ module.exports.inbox = async (event) => {
           const processedData = await s3
             .putObject({
               Bucket: categoryFound.bucket,
-              Key: `${categoryFound.keyPrefix}${messageId}`,
+              Key: `${categoryFound.keyPrefix}/${messageId}.json`,
               Body: JSON.stringify(processed),
               ContentType: 'application/json',
             })
             .promise();
 
           if (processedData) {
+            const response = `${categoryFound.category} message processed into bucket: ${categoryFound.bucket} with the key: ${categoryFound.keyPrefix}${messageId}`;
+
+            console.log(response);
+
             return {
               statusCode: 200,
               body: JSON.stringify({
-                message: `${categoryFound.category} message processed into bucket: ${categoryFound.bucket} with the key: ${categoryFound.keyPrefix}${messageId}`,
+                message: response,
                 event,
               }),
             };
@@ -120,17 +120,21 @@ module.exports.inbox = async (event) => {
           const processedData = await s3
             .putObject({
               Bucket: config.defaultCategory.bucket,
-              Key: `${config.defaultCategory.keyPrefix}${messageId}`,
+              Key: `${config.defaultCategory.keyPrefix}/${messageId}.json`,
               Body: JSON.stringify(processed),
               ContentType: 'application/json',
             })
             .promise();
 
           if (processedData) {
+            const response = `${config.defaultCategory.category} message processed into bucket: ${config.defaultCategory.bucket} with the key: ${config.defaultCategory.keyPrefix}${messageId}`;
+
+            console.log(response);
+
             return {
               statusCode: 200,
               body: JSON.stringify({
-                message: `${config.defaultCategory.category} message processed into bucket: ${config.defaultCategory.bucket} with the key: ${config.defaultCategory.keyPrefix}${messageId}`,
+                message: response,
                 event,
               }),
             };

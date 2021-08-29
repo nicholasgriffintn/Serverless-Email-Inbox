@@ -14,5 +14,11 @@ exports.config = {
       bucket: 'email.nicholasgriffin.dev',
       keyPrefix: 'processed/bookmarks',
     },
+    {
+      email: 'inbox@nicholasgriffin.dev',
+      category: 'inbox',
+      bucket: 'email.nicholasgriffin.dev',
+      keyPrefix: 'processed/inbox',
+    },
   ],
 };
