@@ -1,4 +1,3 @@
-
 service: serverless-email-inbox
 
 provider:
@@ -9,24 +8,19 @@ provider:
   stackName: serverless-email-inbox-stack
   apiName: serverless-email-inbox-api
   iamRoleStatements:
-    - Effect: "Allow"
+    - Effect: 'Allow'
       Action:
-        - "ses:SendRawEmail"
-      Resource: "*"
-    - Effect: "Allow"
-      Action:
-        - "s3:*"
-      Resource: "*"
+        - 's3:*'
+      Resource: 'arn:aws:s3:::email.nicholasgriffin.dev/*'
 
 package:
-  exclude:
-    - config/**
-    - .eslintrc.js
-    - package-lock.json
-    - package.json
-    - yarn.lock
-  include:
-    - config.js
+  patterns:
+    - '!config/**'
+    - '!.eslintrc.js'
+    - '!package-lock.json'
+    - '!package.json'
+    - '!yarn.lock'
+    - 'config.js'
 
 functions:
   inbox:
