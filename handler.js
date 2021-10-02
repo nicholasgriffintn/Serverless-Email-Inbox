@@ -67,23 +67,23 @@ module.exports.inbox = async (event) => {
 
       const { address, name } = from.value[0];
 
-        console.info('Processing message...');
+      console.info('Processing message...');
 
-        const processed = {};
+      const processed = {};
 
-        processed.id = messageId;
-        processed.recieved = date;
-        processed.to = to;
-        processed.from = from;
-        processed.subject = subject;
-        processed.headers = headerLines;
-        processed.attachments = attachments;
-        processed.html = html;
-        processed.subject = subject;
+      processed.id = messageId;
+      processed.recieved = date;
+      processed.to = to;
+      processed.from = from;
+      processed.subject = subject;
+      processed.headers = headerLines;
+      processed.attachments = attachments;
+      processed.html = html;
+      processed.subject = subject;
 
-        const categoryFound = config.emailToCategories.find(
-          (category) => category.email === to.value[0].address
-        );
+      const categoryFound = config.emailToCategories.find(
+        (category) => category.email === to.value[0].address
+      );
 
       if (
         address !== 'me@nicholasgriffin.co.uk' &&
@@ -91,7 +91,7 @@ module.exports.inbox = async (event) => {
         categoryFound !== 'inbox'
       ) {
         throw new Error('No no no!');
-      }
+      } else {
         let processedBucket = config.defaultCategory.bucket;
         let processedKeyPrefix = `${config.defaultCategory.keyPrefix}/${messageId}.json`;
         let response = `${config.defaultCategory.category} message processed into bucket: ${config.defaultCategory.bucket} with the key: ${config.defaultCategory.keyPrefix}${messageId}`;
