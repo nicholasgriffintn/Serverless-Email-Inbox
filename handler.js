@@ -67,10 +67,6 @@ module.exports.inbox = async (event) => {
 
       const { address, name } = from.value[0];
 
-      if (
-        address === 'me@nicholasgriffin.co.uk' &&
-        name === 'Nicholas Griffin'
-      ) {
         console.info('Processing message...');
 
         const processed = {};
@@ -89,6 +85,13 @@ module.exports.inbox = async (event) => {
           (category) => category.email === to.value[0].address
         );
 
+      if (
+        address !== 'me@nicholasgriffin.co.uk' &&
+        name !== 'Nicholas Griffin' &&
+        categoryFound !== 'inbox'
+      ) {
+        throw new Error('No no no!');
+      }
         let processedBucket = config.defaultCategory.bucket;
         let processedKeyPrefix = `${config.defaultCategory.keyPrefix}/${messageId}.json`;
         let response = `${config.defaultCategory.category} message processed into bucket: ${config.defaultCategory.bucket} with the key: ${config.defaultCategory.keyPrefix}${messageId}`;
@@ -130,8 +133,6 @@ module.exports.inbox = async (event) => {
         } else {
           throw new Error('File could not be processed.');
         }
-      } else {
-        throw new Error('No no no!');
       }
     } catch (error) {
       console.error(error);
