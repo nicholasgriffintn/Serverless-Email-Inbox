@@ -13,7 +13,7 @@
     "iconv-lite": "^0.6.3",
     "mailparser": "^3.4.0",
     "nanoid": "^3.1.31",
-    "nodemailer": "^6.7.0"
+    "nodemailer": "^6.7.2"
   },
   "devDependencies": {
     "aws-sdk": "^2.978.0",
