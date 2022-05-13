@@ -85,6 +85,8 @@ module.exports.inbox = async (event) => {
         (category) => category.email === to.value[0].address
       );
 
+      console.info('Category found:', categoryFound);
+
       if (
         address !== 'me@nicholasgriffin.co.uk' &&
         name !== 'Nicholas Griffin' &&
